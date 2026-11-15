@@ -454,14 +454,14 @@ The extractor does not assign UP/DOWN by array position when labels are missing.
 ## Verification performed for this fix
 
 - YAML syntax: parsed successfully using a local YAML parser against the committed workflow content.
-- Focused regression logic checks: 6 local checks passed for public token ID preservation, credential redaction (including camel-case and plain-text cases), candidate metadata extraction, direction-labeled token mapping, no positional token inference, and rejection of non-BTC candidates.
-- The workflow includes the repository's committed `unittest` suite as a preflight step. The GitHub-hosted workflow itself has not been dispatched from this session, so no GitHub Actions test-run result is claimed.
+- Focused regression logic checks: 7 focused local regression scenarios passed for public token ID preservation, credential redaction (including camel-case and plain-text cases), candidate metadata extraction, direction-labeled token mapping, no positional token inference, and rejection of non-BTC candidates.
+- The repository now contains 7 committed `unittest` test methods, and the workflow runs that suite as a preflight step. The GitHub-hosted workflow itself has not been dispatched from this session, so no GitHub Actions test-run result is claimed.
 - No Polymarket endpoint was called as part of this code fix. No market is newly verified or declared missing.
 
 ## Commit references
 
 - Workflow update: `2ab00ba4fa19e867220bfaa303d7b4da90dbd3a7`
-- Diagnostic module updates: latest `b432325ef821fbb9480862ce565ffc549e39f7fb`
-- Regression tests: latest `8d2fab6e4a4ab50915505d1e0409062f9da92e84`
+- Diagnostic module updates: latest `6a23735011ced3f95b6ecfdb7bb769a0ed1af9ea`
+- Regression tests: latest `4c931718a94891bdc52d2b7d88437382a906b4ec`
 
 The project remains **Polymarket US BTC UP/DOWN, exactly 300 seconds, CF Benchmarks BRTI**. This diagnostic remains read-only. No account access, trading, order placement, collector, or Checkpoint 2 work has been introduced.
