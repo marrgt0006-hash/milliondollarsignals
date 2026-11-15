@@ -113,3 +113,119 @@ Therefore market discovery must be a strict typed validation, not a slug guess:
 ## Approval gate
 
 Checkpoint 2 must not begin until the user explicitly approves Checkpoint 1. Before Checkpoint 2, resolve the instrument/venue mismatch. Do not move to Polymarket International or change settlement source without explicit authorization.
+
+
+---
+
+# Follow-up Investigation — BTC 5-Minute on Polymarket US
+
+**Investigated:** 2026-11-15  
+**Scope:** Polymarket US only. No venue or timeframe substitution.  
+**Checkpoint status:** Still Checkpoint 1. No application implementation or Checkpoint 2 work performed.
+
+## Corrected finding
+
+The earlier statement that a BTC 5-minute market had not been found on Polymarket US was too categorical. Further research found credible, specific evidence that BTC 5-minute Up/Down markets have in fact been listed and traded on Polymarket US, and that their settlement reference is BRTI rather than the International venue's Chainlink stream.
+
+However, Polymarket US's own published documentation is internally inconsistent or behind the observed listings: the Crypto Schema explicitly recognizes a `5m` Up/Down horizon and says it can appear in preprod ahead of listing, while also saying only 15m and 1h are listed and production currently carries hand-listed Bitcoin markets. The Crypto FAQ likewise describes 15m and 60m Up/Down cadence. The September 21, 2026 changelog says the automated crypto families were in preprod and production rollout would be announced.
+
+**Conclusion:** BTC 5-minute is not an invented or International-only instrument: third-party datasets and Polymarket US market-data capture evidence identify BTC 5-minute Up/Down markets on the US venue with BRTI settlement. But the official docs reviewed do not document a production 5-minute listing rollout, and the public gateway could not be queried successfully from this research environment. Therefore current active/upcoming status on November 15, 2026 is not directly confirmed from a live official API response. This is an official-documentation/live-catalog discrepancy, not proof that the product is unsupported.
+
+## Official Polymarket US documentation evidence
+
+1. **Public discovery API inventory:** The official API introduction identifies the no-key public gateway `https://gateway.polymarket.us` and documents public discovery through:
+   - `GET /v1/markets`
+   - `GET /v1/events`
+   - `GET /v1/series`
+   - `GET /v1/search`
+   - Market-by-ID and market-by-slug lookups
+   - BBO, book, settlement and price-history lookups
+
+   Official docs: https://docs.polymarket.us/api-reference/introduction
+
+2. **Markets list filters:** The official Get Markets page documents pagination via `limit` and `offset`, plus filters for `active`, `closed`, `archived`, `startDateMin/Max`, `endDateMin/Max`, `categories`, `marketTypes`, and `includeHidden`. The market schema includes `assetPriceTerms`, status, outcomes, market slug, fee coefficient and other market fields.
+
+   Official docs: https://docs.polymarket.us/api-reference/markets/get-markets
+
+3. **Events list filters:** The official Get Events page documents pagination and filters for active/closed/archived, date/time ranges, tags, series IDs, categories, market types, recurrence, and live/ended state. Event responses contain child markets with `assetPriceTerms`, market status, and metadata. Its changelog warns that after October 15, 2026, event list responses return only primary markets; a full market set requires fetching each event by ID or slug. Therefore event-list absence alone is not conclusive.
+
+   Official docs: https://docs.polymarket.us/api-reference/events/get-events  
+   Official changelog: https://docs.polymarket.us/changelog
+
+4. **Search:** The official Search endpoint supports a query, result limit, series IDs, market type, start/closed time filters, status and page number. Search is a useful discovery route but must not replace exhaustive market/series listing and metadata inspection.
+
+   Official docs: https://docs.polymarket.us/api-reference/search/search
+
+5. **Series:** The official Series endpoint supports pagination, slug, active and recurrence filters. The Crypto Schema says to identify crypto markets from typed metadata rather than parsing a symbol or slug.
+
+   Official docs: https://docs.polymarket.us/api-reference/series/get-series  
+   Crypto schema: https://docs.polymarket.us/trader-guide/crypto-schema
+
+6. **Crypto typed metadata:** The official Crypto Schema defines:
+   - `crypto_market_type = updown` / Retail `assetPriceTerms.marketType = ASSET_PRICE_MARKET_TYPE_UP_DOWN`
+   - `crypto_horizon` enum includes `5m`, `15m`, `1h`, `4h`
+   - `crypto_asset_slug = btc`
+   - `crypto_index_symbol = BRTI`
+   - `interval_start` and `interval_end`
+   - `price_to_beat`
+   
+   Critically, its horizon table says 15m and 1h are listed, while 5m and 4h follow the same pattern and can appear in preprod ahead of listing. Its series table enumerates `btc-updown-15m` and `btc-updown-1h`, and says further cadences follow the pattern `btc-updown-<horizon>`. It does not list `btc-updown-5m` as a current production series.
+
+   Official docs: https://docs.polymarket.us/trader-guide/crypto-schema
+
+7. **Production rollout status:** The September 21, 2026 changelog entry states that four automated Bitcoin crypto-market families were documented ahead of production listing, were in preprod at that time, and would reach production on a schedule to be announced. It specifies 15-minute and 60-minute Up/Down windows, not five-minute. The latest changelog entries through November 13, 2026 contain no located announcement explicitly promoting BTC 5m Up/Down to production. This is evidence about the published rollout record, not definitive proof that the market has never been listed.
+
+   Official docs: https://docs.polymarket.us/changelog
+
+8. **Other BTC market classifications:** The Crypto Schema lists four families: `updown`, `strike`, `range`, and `hit`. Above/Below, Price Range and One-Touch are not equivalent to a five-minute Up/Down contract. The schema's documented 5m horizon belongs to the `updown` family. No alternate family in the official schema defines a BTC five-minute UP/DOWN contract.
+
+## Independent evidence of actual Polymarket US 5-minute listings
+
+These sources are not official Polymarket documentation, so they do not override official market rules. They do provide specific observational evidence that the US venue has had 5-minute BTC Up/Down markets:
+
+- **PMData Polymarket US historical data details:** identifies Polymarket US as a separate US exchange with its own market slugs and order books; states that its Up/Down market-data collection had gaps affecting 5-minute rounds, and specifically calls out BTC 5-minute, ETH 5-minute and BTC 15-minute as active high-coverage products. It documents collection from the Polymarket US markets WebSocket at `wss://api.polymarket.us/v1/ws/markets`, including full L2 book and trade messages. Its stated fixes are dated November 7 and November 10, 2026.
+
+  Source: https://pmdata.dev/docs/historical-data-details/polymarket-us
+
+- **PMData Polymarket US market catalog:** describes a daily-updated public Parquet catalog of every Polymarket US market PMData has recorded, with exchange, event slug, market slug, dates, question, outcomes, series, category and market type. This is a way to independently inspect recorded US listings, but the catalog file itself was not successfully retrieved and filtered during this investigation.
+
+  Source: https://pmdata.dev/docs/schemas/polymarket-us/markets-catalog
+
+- **BTC 5m US/International side-by-side capture:** a dataset card describes a read-only recording of Polymarket US and Polymarket International BTC 5-minute Up/Down order books, trades and settlements side by side on October 27, 2026. It explicitly distinguishes US settlement on CF Benchmarks BRTI from International settlement on Chainlink. The card reports actual US REST and US markets-WebSocket frames.
+
+  Source: https://huggingface.co/datasets/bvin02/polymarket-btc-5m
+
+These observations make the venue distinction especially clear: a BTC 5-minute US market has been captured with BRTI settlement. It is not appropriate to reject the user's requested venue based solely on the FAQ's cadence table.
+
+## Active, upcoming, alternate classification, support status
+
+| Question | Finding |
+|---|---|
+| Has BTC 5m UP/DOWN existed on Polymarket US? | **Yes, credible independent market-data captures document it.** |
+| Does official schema recognize a 5m Up/Down horizon? | **Yes.** `crypto_horizon` includes `5m` for `updown`. |
+| Does official documentation say 5m is a listed production cadence? | **No.** It says 15m and 1h are listed; 5m/4h can appear in preprod ahead of listing. |
+| Is an active BTC 5m US window confirmed right now (2026-11-15)? | **Not directly confirmed.** Live official gateway response was not obtained in this research environment. |
+| Is an upcoming BTC 5m US window confirmed? | **Not directly confirmed.** Same live catalog limitation. |
+| Is there another documented family that means 5m UP/DOWN? | **No.** The matching typed family is `updown`; other families are different contracts. |
+| Is 5m unsupported by Polymarket US? | **Cannot conclude unsupported.** Actual US market captures contradict a blanket unsupported conclusion. Production listing documentation remains inconsistent/stale. |
+
+## Exact remaining verification required — without guessing
+
+A proper runtime confirmation should use only documented Polymarket US public routes and query every relevant discovery path:
+
+1. Page through `GET https://gateway.polymarket.us/v1/markets` using documented `limit` and `offset`; inspect active, inactive, closed, hidden and date-bounded results. Do not filter only by title or guessed slug.
+2. Page through `GET /v1/series`; inspect all series, active and inactive, and search BTC crypto-related series. The series endpoint documents slug, active and recurrence filters.
+3. Page through `GET /v1/events` with crypto-related categories and date ranges, then fetch full event details by ID/slug because the event list can return only primary markets.
+4. Query `GET /v1/search` with Bitcoin/BTC/Up Down queries and inspect all pages/statuses.
+5. For every candidate, inspect typed Retail `assetPriceTerms`: require asset class crypto, symbol BTC, market type Up/Down, and exact 300-second difference between `windowStartTime` and `windowEndTime`. Verify market/event status and explicit Yes/No direction mapping. Do not rely on the market title or slug alone.
+6. Fetch the candidate's official rules, BBO, book and settlement endpoint. Require BRTI settlement terms matching the exact instrument.
+7. For upcoming markets, verify future window start/end and actual tradability/listing status; do not infer upcoming from a generic series pattern.
+8. Save the raw responses, request URLs, timestamps, and response hashes as evidence.
+
+**Tool limitation in this investigation:** The official documentation pages were accessible and reviewed, but direct opening of the public API gateway URLs from this web research environment returned an access/tool error rather than a JSON response. This is not an HTTP status from Polymarket and must not be reported as an API 404 or as evidence of no market.
+
+## Corrected project decision
+
+Keep the required target as **Polymarket US BTC 5-minute UP/DOWN settled by the instrument's verified Polymarket US/BRTI rules**. Do not switch to International, Chainlink, 15-minute markets, or another crypto market family. Until an official live candidate is resolved and its terms verified, the signal terminal must show market-discovery status as `UNVERIFIED` / `NO CALL`, not substitute a different instrument.
+
+No code has been changed. No Checkpoint 2 work has begun. The only action permitted by this follow-up was documentation research.
