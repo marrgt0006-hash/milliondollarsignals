@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import re
 import socket
 import ssl
 import time
@@ -27,7 +28,8 @@ _SECRET_KEYS = {
 
 
 def _normalized_key(key: Any) -> str:
-    text = re.sub(r"([a-z0-9])([A-Z])", r"\\1_\\2", str(key))\n    return re.sub(r"[^a-zA-Z0-9]+", "_", text).strip("_").lower()
+    text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", str(key))
+    return re.sub(r"[^a-zA-Z0-9]+", "_", text).strip("_").lower()
 
 
 def redact_public_payload(value: Any) -> Any:
