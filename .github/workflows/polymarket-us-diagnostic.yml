@@ -80,7 +80,7 @@ jobs:
                   for z in v.values(): yield from walk(z)
               elif isinstance(v,list):
                   for z in v: yield from walk(z)
-          candidates=[]; seen=set()
+          candidates=[]; seen=set(); candidate_sources=set()
           for r in results:
               if r["http_status"] is None or not 200 <= r["http_status"] < 300: continue
               for obj in walk(r["response_body"]):
@@ -99,10 +99,11 @@ jobs:
                           b=dt.datetime.fromisoformat(str(end).replace("Z","+00:00"))
                           duration=(b-a).total_seconds()
                       except Exception: pass
+                      candidate_sources.add(r["name"])
                       candidates.append({"source":r["name"],"id":obj.get("id"),"slug":obj.get("slug"),"question":obj.get("question"),"asset_class":asset.get("assetClass"),"asset_symbol":asset.get("symbol"),"market_type":terms.get("marketType") or obj.get("marketType"),"horizon":terms.get("horizon"),"index_symbol":terms.get("indexSymbol"),"window_start":start,"window_end":end,"computed_duration_seconds":duration,"direction":terms.get("direction"),"market_sides":obj.get("marketSides"),"outcomes":obj.get("outcomes"),"fee_coefficient":obj.get("feeCoefficient"),"status":obj.get("status"),"active":obj.get("active"),"closed":obj.get("closed"),"raw_candidate":obj})
           for r in results:
               if r["classification"]=="SUCCESSFUL_RESPONSE":
-                  r["classification"]="SUCCESSFUL_RESPONSE_WITH_MATCH" if candidates else "SUCCESSFUL_RESPONSE_NO_MATCH"
+                  r["classification"]="SUCCESSFUL_RESPONSE_WITH_MATCH" if r["name"] in candidate_sources else "SUCCESSFUL_RESPONSE_NO_MATCH"
           generated=dt.datetime.now(dt.timezone.utc).isoformat()
           report={"generated_at_utc":generated,"runner":"GitHub-hosted ubuntu-latest","host":host,"scope":"Public unauthenticated GET only; no account/order/trading/private endpoints","dns":dns,"endpoints":results,"candidate_count":len(candidates),"candidates":candidates,"verification_note":"Discovery candidates are not verified. Require explicit BTC crypto asset, UP/DOWN family, 5m horizon, exact 300-second timestamps, BRTI settlement rules, opening/closing timestamps, explicit outcome/token mapping, and market-specific feeCoefficient. Missing fields remain null; do not infer."}
           Path("diagnostics/latest/polymarket-us-diagnostic.json").write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n")
