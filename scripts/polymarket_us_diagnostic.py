@@ -166,7 +166,7 @@ def extract_candidate(obj: dict, source_endpoint: str = "") -> dict | None:
     if resolution is None:
         resolution = _first(
             terms, "settlementSource", "resolutionSource", "indexSymbol",
-            "settlementReference", "resolutionSourceDescription",
+            "settlementReference", "resolutionSourceDescription", "settlementMethod", "resolutionMethod",
         )
 
     return {
