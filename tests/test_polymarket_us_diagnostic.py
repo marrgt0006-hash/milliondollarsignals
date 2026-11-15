@@ -79,6 +79,22 @@ class CandidateExtractionTests(unittest.TestCase):
         self.assertEqual(candidate["down_token_id"], "token-down-002")
         self.assertEqual(candidate["verification_status"], "UNVERIFIED_CANDIDATE")
 
+    def test_extracts_token_ids_from_direction_keyed_market_sides(self):
+        market = {
+            "assetPriceTerms": {
+                "asset": {"symbol": "BTC"},
+                "marketType": "UP_DOWN",
+                "horizon": "5m",
+            },
+            "marketSides": {
+                "UP": {"tokenId": "up-keyed"},
+                "DOWN": {"token_id": "down-keyed"},
+            },
+        }
+        candidate = extract_candidate(market)
+        self.assertEqual(candidate["up_token_id"], "up-keyed")
+        self.assertEqual(candidate["down_token_id"], "down-keyed")
+
     def test_does_not_infer_direction_from_unlabelled_token_order(self):
         market = {
             "id": "m1",
