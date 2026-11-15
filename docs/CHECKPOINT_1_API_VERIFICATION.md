@@ -384,7 +384,7 @@ No application code was written, no collector was started, and Checkpoint 2 was 
 
 **Authorization:** User explicitly authorized creation and execution of a one-time, manually triggered GitHub Actions diagnostic.  
 **Workflow file:** `.github/workflows/polymarket-us-diagnostic.yml`  
-**Workflow commit:** `b5d0867f4c548d30b86455de372ec4e66362973e`  
+**Workflow commit:** `6135c8ce7d4846783c38b394c530689c69583c1b`  
 **Workflow URL:** https://github.com/marrgt0006-hash/milliondollarsignals/actions/workflows/polymarket-us-diagnostic.yml
 
 ## Workflow contents
@@ -399,7 +399,7 @@ No application code was written, no collector was started, and Checkpoint 2 was 
   - `GET /v1/search?query=BTC&limit=100&page=1&status=active`
 - Records request URL, HTTP status when received, response time, content type, classified network/HTTP result, and sanitized/truncated response body.
 - Distinguishes DNS failure, connection failure, TLS failure, HTTP error, empty 2xx response, and successful response with/without candidate match.
-- Scans successful JSON payloads for BTC + UP/DOWN + five-minute candidate objects. Candidate extraction records only returned fields, including asset, market type, horizon, BRTI index symbol, timestamps, computed duration when both timestamps parse, outcomes/market sides, status and fee coefficient. Missing fields remain null.
+- Scans successful JSON payloads for BTC + UP/DOWN + five-minute candidate objects and classifies match/no-match separately for each endpoint. Candidate extraction records only returned fields, including asset, market type, horizon, BRTI index symbol, timestamps, computed duration when both timestamps parse, outcomes/market sides, status and fee coefficient. Missing fields remain null.
 - Discovery text matches are not treated as verification. Final verification still requires official market detail/rules/settlement evidence for BTC crypto asset, UP/DOWN family, five-minute horizon, exactly 300 seconds, BRTI reference, opening/closing timestamps, explicit outcome/token mapping and the market-specific fee coefficient.
 - Uploads `diagnostics/latest/` as artifact `polymarket-us-api-diagnostic` (30-day retention).
 - Commits `diagnostics/latest/` to the repository after the diagnostic completes.
