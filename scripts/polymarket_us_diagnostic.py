@@ -210,12 +210,12 @@ def extract_candidate(obj: dict, source_endpoint: str = "") -> dict | None:
 def redact_text_credentials(value: str) -> str:
     """Redact credential-like values in plain-text error bodies."""
     patterns = (
-        r"(?i)(authorization\\s*[:=]\\s*(?:bearer\\s+)?)[^\\s,;]+",
-        r"(?i)((?:set-cookie|cookie)\\s*[:=]\\s*)[^;\\r\\n]+",
-        r"(?i)((?:access_token|refresh_token|api_key|apikey|client_secret|password|private_key|session_secret|session_token|csrf_token)\\s*[:=]\\s*)[^&\\s,;]+",
+        r"(?i)(authorization\s*[:=]\s*(?:bearer\s+)?)[^\s,;]+",
+        r"(?i)((?:set-cookie|cookie)\s*[:=]\s*)[^;\r\n]+",
+        r"(?i)((?:access_token|refresh_token|api_key|apikey|client_secret|password|private_key|session_secret|session_token|csrf_token)\s*[:=]\s*)[^&\s,;]+",
     )
     for pattern in patterns:
-        value = re.sub(pattern, r"\\1[REDACTED]", value)
+        value = re.sub(pattern, r"\1[REDACTED]", value)
     return value
 
 
