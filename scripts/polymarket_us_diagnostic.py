@@ -311,7 +311,7 @@ def run_diagnostic(output_dir: str = "diagnostics/latest"):
         "verification_note": "Candidates remain UNVERIFIED until official market detail, rules, and settlement evidence confirms all required properties.",
     }
     (out / "polymarket-us-diagnostic.json").write_text(
-        json.dumps(report, indent=2, ensure_ascii=False) + "\\n", encoding="utf-8"
+        json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
     lines = [
         "# Polymarket US API Diagnostic", "", f"- Generated UTC: {generated}",
@@ -324,7 +324,7 @@ def run_diagnostic(output_dir: str = "diagnostics/latest"):
         lines.append(f"| {result['name']} | {result['classification']} | {status} | {result['response_time_ms']} |")
     lines += ["", f"BTC UP/DOWN 5-minute discovery candidates: {len(candidates)}.", "",
               "Candidates are UNVERIFIED. Consult the JSON for returned fields, including directional token IDs."]
-    (out / "README.md").write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+    (out / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(json.dumps({
         "dns": dns,
         "endpoints": [{key: result[key] for key in ("name", "classification", "http_status", "response_time_ms")} for result in results],
