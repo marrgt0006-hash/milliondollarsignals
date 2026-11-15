@@ -376,3 +376,45 @@ The required target remains unchanged: **Polymarket US BTC UP/DOWN, exactly 300 
 **Checkpoint 1 live API investigation is blocked by DNS resolution failure in this execution environment.** Historical US listing evidence and official schema support remain documented in the earlier sections, but present active/upcoming status is not established.
 
 No application code was written, no collector was started, and Checkpoint 2 was not started. Stop here pending user decision and/or a repeat API test from a network with DNS access.
+
+
+---
+
+# One-Time GitHub Actions API Diagnostic — 2026-11-15
+
+**Authorization:** User explicitly authorized creation and execution of a one-time, manually triggered GitHub Actions diagnostic.  
+**Workflow file:** `.github/workflows/polymarket-us-diagnostic.yml`  
+**Workflow commit:** `b5d0867f4c548d30b86455de372ec4e66362973e`  
+**Workflow URL:** https://github.com/marrgt0006-hash/milliondollarsignals/actions/workflows/polymarket-us-diagnostic.yml
+
+## Workflow contents
+
+- Trigger: `workflow_dispatch` only.
+- Runner: GitHub-hosted `ubuntu-latest`.
+- DNS: resolves `gateway.polymarket.us` and records resolved addresses or a classified DNS error.
+- Public endpoints:
+  - `GET /v1/markets?limit=100&offset=0&active=true&closed=false&archived=false&includeHidden=true`
+  - `GET /v1/events?limit=100&offset=0&active=true&closed=false&archived=false&includeHidden=true`
+  - `GET /v1/series?limit=100&offset=0`
+  - `GET /v1/search?query=BTC&limit=100&page=1&status=active`
+- Records request URL, HTTP status when received, response time, content type, classified network/HTTP result, and sanitized/truncated response body.
+- Distinguishes DNS failure, connection failure, TLS failure, HTTP error, empty 2xx response, and successful response with/without candidate match.
+- Scans successful JSON payloads for BTC + UP/DOWN + five-minute candidate objects. Candidate extraction records only returned fields, including asset, market type, horizon, BRTI index symbol, timestamps, computed duration when both timestamps parse, outcomes/market sides, status and fee coefficient. Missing fields remain null.
+- Discovery text matches are not treated as verification. Final verification still requires official market detail/rules/settlement evidence for BTC crypto asset, UP/DOWN family, five-minute horizon, exactly 300 seconds, BRTI reference, opening/closing timestamps, explicit outcome/token mapping and the market-specific fee coefficient.
+- Uploads `diagnostics/latest/` as artifact `polymarket-us-api-diagnostic` (30-day retention).
+- Commits `diagnostics/latest/` to the repository after the diagnostic completes.
+- Makes only unauthenticated public GET requests. It does not call account, order, trading, or private endpoints and does not use secrets or cookies.
+
+## Execution status — not yet run
+
+The workflow file was created and its contents were read back from GitHub. However, the GitHub integration available to this session does not expose a workflow-dispatch action. Therefore I could not start the `workflow_dispatch` run from this session.
+
+**No GitHub Actions run ID exists in the evidence available here. No runner DNS result, endpoint HTTP status, response time, response body, candidate result, or downloadable artifact has yet been produced.** The earlier local DNS failure documented above remains the only observed API connectivity result; it must not be confused with a GitHub-hosted runner result.
+
+To execute the authorized diagnostic, open the workflow URL above, select **Run workflow**, keep branch `main), and confirm **Run workflow**. GitHub Actions will then produce the run result and artifact. This manual trigger is required because the connected GitHub action set in this session has no dispatch capability.
+
+## Checkpoint and stop decision
+
+This is infrastructure/API diagnosis only. No Polybot application code, collector, trading functionality, or Checkpoint 2 implementation was added. The target remains Polymarket US BTC UP/DOWN, exactly 300 seconds, CF Benchmarks BRTI. Do not substitute Polymarket International, Chainlink, or a 15-minute market.
+
+**Checkpoint 1 remains blocked pending the actual GitHub Actions run and candidate-level verification. Stop here and wait for the user's approval after the diagnostic results are available.**
