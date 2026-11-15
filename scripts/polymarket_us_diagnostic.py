@@ -70,7 +70,7 @@ def _walk(value):
 
 def _side_label(side: Any) -> str:
     if isinstance(side, dict):
-        raw = _first(side, "name", "label", "outcome", "side", "direction", "title")
+        raw = _first(side, "name", "label", "outcome", "side", "direction", "title", "sideName", "outcomeName")
         return str(raw or "").strip().lower()
     return str(side or "").strip().lower()
 
@@ -161,7 +161,7 @@ def extract_candidate(obj: dict, source_endpoint: str = "") -> dict | None:
 
     resolution = _first(
         obj, "settlementSource", "resolutionSource", "resolution_source",
-        "settlementReference", "resolutionSourceDescription", "rulesDisclaimer",
+        "settlementReference", "resolutionSourceDescription", "settlementMethod", "resolutionMethod", "rulesDisclaimer",
     )
     if resolution is None:
         resolution = _first(
