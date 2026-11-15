@@ -229,3 +229,150 @@ A proper runtime confirmation should use only documented Polymarket US public ro
 Keep the required target as **Polymarket US BTC 5-minute UP/DOWN settled by the instrument's verified Polymarket US/BRTI rules**. Do not switch to International, Chainlink, 15-minute markets, or another crypto market family. Until an official live candidate is resolved and its terms verified, the signal terminal must show market-discovery status as `UNVERIFIED` / `NO CALL`, not substitute a different instrument.
 
 No code has been changed. No Checkpoint 2 work has begun. The only action permitted by this follow-up was documentation research.
+
+
+---
+
+# Final Checkpoint 1 Live API Attempt — 2026-11-15
+
+**Scope:** Polymarket US public API only. BTC UP/DOWN, exact 300-second duration, CF Benchmarks BRTI.  
+**No code implementation, no collector, no Checkpoint 2.**
+
+## Official API documentation and exact discovery routes
+
+The official API introduction explicitly separates:
+- Public read-only market-data API: `https://gateway.polymarket.us` (no API key).
+- Authenticated trading/account API: `https://api.polymarket.us` (API key required).
+
+Only the public gateway was used in this investigation. No authenticated endpoint was called.
+
+Official documentation: https://docs.polymarket.us/api-reference/introduction
+
+### 1. GET /v1/markets
+
+Documented route:
+`GET https://gateway.polymarket.us/v1/markets`
+
+Documented query parameters include:
+`limit`, `offset`, `orderBy`, `orderDirection`, `id`, `slug`, `archived`, `active`, `closed`, `startDateMin`, `startDateMax`, `endDateMin`, `endDateMax`, `categories`, `marketTypes`, `includeHidden`, and `tagIds`.
+
+Response schema includes market `id`, `slug`, `question`, `active`, `closed`, `archived`, `marketType`, `marketSides`, `outcomes`, `status`, `assetPriceTerms`, `feeCoefficient`, `rulesDisclaimer`, and related fields.
+
+Official docs: https://docs.polymarket.us/api-reference/markets/get-markets
+
+**Runtime request attempted:**
+`GET https://gateway.polymarket.us/v1/markets?limit=100&offset=0&active=true&closed=false&archived=false&includeHidden=true`
+
+**Runtime result:** DNS resolution failed before an HTTP connection was established:
+`urllib.error.URLError: <urlopen error [Errno -3] Temporary failure in name resolution>`
+
+HTTP status: **not received**. Content-Type: **not received**. Response body: **none**. This is not an HTTP 404 and not an empty market list.
+
+### 2. GET /v1/events
+
+Documented route:
+`GET https://gateway.polymarket.us/v1/events`
+
+Documented query parameters include pagination (`limit`, `offset`), status (`active`, `closed`, `archived`, `ended`, `live`), date/time windows (`startDateMin/Max`, `endDateMin/Max`, `startTimeMin/Max`, `eventDate`), `seriesId`, `categories`, `marketTypes`, `tagSlug`, `tagIds`, `recurrence`, `includeTemplate`, and `includeHidden`.
+
+Event responses contain child `markets` with their IDs, slugs, status, market type, market sides, and asset price terms. Because event-list responses may return only primary markets, full event detail lookup is required for candidates.
+
+Official docs: https://docs.polymarket.us/api-reference/events/get-events
+
+**Runtime request attempted:**
+`GET https://gateway.polymarket.us/v1/events?limit=100&offset=0&active=true&closed=false&archived=false&includeHidden=true&startTimeMin=2026-11-15T00:00:00Z`
+
+**Runtime result:** DNS resolution failed before an HTTP connection was established:
+`urllib.error.URLError: <urlopen error [Errno -3] Temporary failure in name resolution>`
+
+HTTP status: **not received**. Content-Type: **not received**. Response body: **none**. This is not an HTTP 404 and not an empty event list.
+
+### 3. GET /v1/series
+
+Documented route:
+`GET https://gateway.polymarket.us/v1/series`
+
+Documented query parameters include `limit`, `offset`, `orderBy`, `orderDirection`, `slug`, `active`, and `recurrence`. The documented response returns series IDs, slugs, titles, recurrence and active status.
+
+Official docs: https://docs.polymarket.us/api-reference/series/get-series
+
+**Runtime request attempted:**
+`GET https://gateway.polymarket.us/v1/series?limit=100&offset=0`
+
+**Runtime result:** DNS resolution failed before an HTTP connection was established:
+`urllib.error.URLError: <urlopen error [Errno -3] Temporary failure in name resolution>`
+
+HTTP status: **not received**. Content-Type: **not received**. Response body: **none**. This is not an HTTP 404 and not an empty series list.
+
+### 4. GET /v1/search
+
+Documented route:
+`GET https://gateway.polymarket.us/v1/search`
+
+Documented query parameters include `query`, `limit`, `seriesIds`, `marketType`, `startTimeMin/Max`, `closedTimeMin/Max`, `status`, `page`, and `comboEnabledOnly`.
+
+Official docs: https://docs.polymarket.us/api-reference/search/search
+
+**Runtime request attempted:**
+`GET https://gateway.polymarket.us/v1/search?query=BTC&limit=100&page=1&status=active`
+
+**Runtime result:** DNS resolution failed before an HTTP connection was established:
+`urllib.error.URLError: <urlopen error [Errno -3] Temporary failure in name resolution>`
+
+HTTP status: **not received**. Content-Type: **not received**. Response body: **none**. This is not an HTTP 404 and not an empty search result.
+
+### 5. Market lookup by ID and slug
+
+The official API documents:
+- `GET /v1/market/id/{id}` — https://docs.polymarket.us/api-reference/markets/get-market-by-id
+- `GET /v1/market/slug/{slug}` — https://docs.polymarket.us/api-reference/markets/get-market-by-slug
+
+The market detail schema exposes the fields needed for final validation: `id`, `slug`, `status`, `marketSides`, `outcomes`, `assetPriceTerms.marketType`, `assetPriceTerms.asset.assetClass`, `assetPriceTerms.asset.symbol`, `assetPriceTerms.indexSymbol`, `assetPriceTerms.horizon`, `assetPriceTerms.windowStart`, `assetPriceTerms.windowEnd`, `assetPriceTerms.direction`, and `feeCoefficient`.
+
+No actual candidate ID or slug was available from an official live response, so no placeholder or guessed identifier was sent to either lookup route. Both lookups remain unexecuted for that reason. The documented route formats are verified; runtime response status is not.
+
+## Actual runtime evidence summary
+
+The runtime test was executed from the available container environment on 2026-11-15 using Python's standard-library HTTPS client with an Accept: application/json header and a 15-second timeout. Four independent public discovery requests were attempted. All four failed at DNS name resolution for `gateway.polymarket.us`, with the same exact error `[Errno -3] Temporary failure in name resolution`.
+
+| Route | Attempted | HTTP status | Result |
+|---|---:|---|---|
+| `GET /v1/markets` | Yes | None | DNS resolution failure |
+| `GET /v1/events` | Yes | None | DNS resolution failure |
+| `GET /v1/series` | Yes | None | DNS resolution failure |
+| `GET /v1/search` | Yes | None | DNS resolution failure |
+| `GET /v1/market/id/{id}` | No | None | No verified candidate ID; no guessing |
+| `GET /v1/market/slug/{slug}` | No | None | No verified candidate slug; no guessing |
+
+No response format or actual market fields were received at runtime. The documented response format is JSON, but that is documentation evidence, not an observed live response.
+
+## Requested market verification result
+
+| Required property | Runtime result |
+|---|---|
+| Live BTC 5m US market found | **Not determined** |
+| Upcoming BTC 5m US market found | **Not determined** |
+| Actual market ID | Not obtained |
+| Actual market slug | Not obtained |
+| Actual opening timestamp | Not obtained |
+| Actual closing timestamp | Not obtained |
+| Exact 300-second duration | Not runtime verified |
+| UP/DOWN outcome mapping | Not runtime verified |
+| BRTI index reference on a current candidate | Not runtime verified |
+| Market-specific `feeCoefficient` | Not runtime verified |
+
+The market schema documents the fields necessary to verify all of these, including a BTC crypto asset, UP/DOWN market type, index symbol, horizon, window timestamps, direction/outcome metadata, and fee coefficient. But no live JSON payload was obtained, so none of these candidate-specific values can be truthfully reported.
+
+## Failure classification and remaining limitation
+
+This was a **network/DNS failure**, not an HTTP error. No HTTP request reached the Polymarket API server, so it is impossible to classify any endpoint as returning 200, 404, 429, 5xx, or an empty collection. It would be incorrect to say that no BTC 5-minute market exists based on this run.
+
+The current environment cannot resolve the official API hostname. A repeat from a network environment with working DNS/egress (for example the user's Mac or a GitHub Actions runner) is required to collect real response headers, status codes, and sanitized JSON evidence. If a candidate is returned, its actual ID/slug must be passed to the official detail route and its BRTI terms, 300-second timestamp delta, UP/DOWN mapping, and feeCoefficient verified from that response.
+
+## Final checkpoint decision
+
+The required target remains unchanged: **Polymarket US BTC UP/DOWN, exactly 300 seconds, CF Benchmarks BRTI**. No International, Chainlink, or 15-minute substitution is permitted.
+
+**Checkpoint 1 live API investigation is blocked by DNS resolution failure in this execution environment.** Historical US listing evidence and official schema support remain documented in the earlier sections, but present active/upcoming status is not established.
+
+No application code was written, no collector was started, and Checkpoint 2 was not started. Stop here pending user decision and/or a repeat API test from a network with DNS access.
