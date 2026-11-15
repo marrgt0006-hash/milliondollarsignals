@@ -418,3 +418,50 @@ To execute the authorized diagnostic, open the workflow URL above, select **Run 
 This is infrastructure/API diagnosis only. No Polybot application code, collector, trading functionality, or Checkpoint 2 implementation was added. The target remains Polymarket US BTC UP/DOWN, exactly 300 seconds, CF Benchmarks BRTI. Do not substitute Polymarket International, Chainlink, or a 15-minute market.
 
 **Checkpoint 1 remains blocked pending the actual GitHub Actions run and candidate-level verification. Stop here and wait for the user's approval after the diagnostic results are available.**
+
+
+---
+
+# Diagnostic Redaction and Candidate Extraction Fix — 2026-11-15
+
+**Scope:** Fix the one-time Polymarket US public API diagnostic only. No market, venue, timeframe, settlement, or application architecture changes.
+
+## Changes committed
+
+- Workflow: `.github/workflows/polymarket-us-diagnostic.yml`
+  - Runs YAML parsing and the focused unit tests before making the four public GET requests.
+  - Continues to use `workflow_dispatch`, `ubuntu-latest`, public unauthenticated GET requests only, artifact upload, and diagnostic-results commit.
+- Testable diagnostic module: `scripts/polymarket_us_diagnostic.py`
+- Regression tests: `tests/test_polymarket_us_diagnostic.py`
+
+## Redaction correction
+
+The previous generic `token` key match could redact public market identifiers. The updated redactor deliberately preserves `tokenId`, `token_id`, and other public outcome token ID fields. It redacts explicit credential keys, including authorization, proxy authorization, cookies/set-cookie, access tokens, refresh tokens, ID tokens, API keys, client secrets, passwords, private keys, session secrets/tokens, and CSRF tokens. Camel-case and separator variations are normalized. Plain-text error bodies also redact credential-like header/parameter values without matching public `tokenId` fields.
+
+## Candidate extraction
+
+Every discovered BTC 5-minute UP/DOWN candidate now explicitly records, when present in the response:
+
+- Market ID and slug
+- Asset class/symbol, market family and horizon
+- Settlement/resolution source, including explicit settlement/resolution fields and BRTI index symbol
+- Start and end timestamps, and computed duration when both timestamps parse
+- Market status, active/closed flags and market-specific fee coefficient
+- UP token ID and DOWN token ID, extracted from labeled market sides or labeled outcomes/token ID arrays
+
+The extractor does not assign UP/DOWN by array position when labels are missing. Missing fields remain null. Every extracted object is marked `UNVERIFIED_CANDIDATE`; an API discovery match alone is not market verification. Official market detail, rules and settlement evidence must still confirm BTC, UP/DOWN, five-minute horizon, exact 300-second interval, BRTI settlement, outcome/token mapping, and the market-specific fee coefficient.
+
+## Verification performed for this fix
+
+- YAML syntax: parsed successfully using a local YAML parser against the committed workflow content.
+- Focused regression logic checks: 6 local checks passed for public token ID preservation, credential redaction (including camel-case and plain-text cases), candidate metadata extraction, direction-labeled token mapping, no positional token inference, and rejection of non-BTC candidates.
+- The workflow includes the repository's committed `unittest` suite as a preflight step. The GitHub-hosted workflow itself has not been dispatched from this session, so no GitHub Actions test-run result is claimed.
+- No Polymarket endpoint was called as part of this code fix. No market is newly verified or declared missing.
+
+## Commit references
+
+- Workflow update: `2ab00ba4fa19e867220bfaa303d7b4da90dbd3a7`
+- Diagnostic module updates: latest `b432325ef821fbb9480862ce565ffc549e39f7fb`
+- Regression tests: latest `8d2fab6e4a4ab50915505d1e0409062f9da92e84`
+
+The project remains **Polymarket US BTC UP/DOWN, exactly 300 seconds, CF Benchmarks BRTI**. This diagnostic remains read-only. No account access, trading, order placement, collector, or Checkpoint 2 work has been introduced.
