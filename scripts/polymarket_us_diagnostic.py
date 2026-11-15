@@ -27,7 +27,7 @@ _SECRET_KEYS = {
 
 
 def _normalized_key(key: Any) -> str:
-    return "".join(ch.lower() if ch.isalnum() else "_" for ch in str(key)).strip("_")
+    text = re.sub(r"([a-z0-9])([A-Z])", r"\\1_\\2", str(key))\n    return re.sub(r"[^a-zA-Z0-9]+", "_", text).strip("_").lower()
 
 
 def redact_public_payload(value: Any) -> Any:
@@ -36,7 +36,7 @@ def redact_public_payload(value: Any) -> Any:
         cleaned = {}
         for key, item in value.items():
             normalized = _normalized_key(key)
-            if normalized in _SECRET_KEYS:
+            if normalized in _SECRET_KEYS or any(part in normalized for part in ("authorization", "cookie", "access_token", "refresh_token", "id_token", "api_key", "client_secret", "password", "passwd", "private_key", "session_secret", "session_token", "csrf_token")):
                 cleaned[str(key)] = "[REDACTED]"
             else:
                 cleaned[str(key)] = redact_public_payload(item)
