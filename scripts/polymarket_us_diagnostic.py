@@ -38,7 +38,7 @@ def redact_public_payload(value: Any) -> Any:
         cleaned = {}
         for key, item in value.items():
             normalized = _normalized_key(key)
-            if normalized in _SECRET_KEYS or any(part in normalized for part in ("authorization", "cookie", "access_token", "refresh_token", "id_token", "api_key", "client_secret", "password", "passwd", "private_key", "session_secret", "session_token", "csrf_token")):
+            if normalized in _SECRET_KEYS or any(part in normalized for part in ("authorization", "cookie", "access_token", "refresh_token", "id_token", "api_key", "client_secret", "secret", "password", "passwd", "private_key", "session_secret", "session_token", "csrf_token")):
                 cleaned[str(key)] = "[REDACTED]"
             else:
                 cleaned[str(key)] = redact_public_payload(item)
@@ -212,7 +212,7 @@ def redact_text_credentials(value: str) -> str:
     patterns = (
         r"(?i)(authorization\s*[:=]\s*(?:bearer\s+)?)[^\s,;]+",
         r"(?i)((?:set-cookie|cookie)\s*[:=]\s*)[^;\r\n]+",
-        r"(?i)((?:access_token|refresh_token|api_key|apikey|client_secret|password|private_key|session_secret|session_token|csrf_token)\s*[:=]\s*)[^&\s,;]+",
+        r"(?i)((?:access_token|refresh_token|api_key|apikey|client_secret|api_secret|secret|password|private_key|session_secret|session_token|csrf_token)\s*[:=]\s*)[^&\s,;]+",
     )
     for pattern in patterns:
         value = re.sub(pattern, r"\1[REDACTED]", value)
