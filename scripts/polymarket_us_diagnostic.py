@@ -94,7 +94,13 @@ def _extract_direction_tokens(obj: dict) -> dict:
         if isinstance(value, list):
             containers.extend(value)
         elif isinstance(value, dict):
-            containers.extend(value.values())
+            for label, side in value.items():
+                if isinstance(side, dict):
+                    labelled = dict(side)
+                    labelled.setdefault("name", label)
+                    containers.append(labelled)
+                else:
+                    containers.append({"name": label, "tokenId": side})
 
     # Some schemas keep outcome labels and token IDs in parallel arrays.
     outcomes = obj.get("outcomes")
