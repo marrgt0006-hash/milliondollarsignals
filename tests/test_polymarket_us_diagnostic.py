@@ -22,6 +22,9 @@ class RedactionTests(unittest.TestCase):
     def test_credentials_are_redacted_recursively(self):
         payload = {
             "Authorization": "Bearer secret",
+            "X-Api-Key": "api-header-secret",
+            "refreshToken": "refresh-camel-secret",
+            "sessionSecret": "session-camel-secret",
             "cookie": "session=secret",
             "accessToken": "access-secret",
             "refresh_token": "refresh-secret",
@@ -33,7 +36,7 @@ class RedactionTests(unittest.TestCase):
             "nested": {"client_secret": "client-secret", "tokenId": "public-id"},
         }
         cleaned = redact_public_payload(payload)
-        for key in ("Authorization", "cookie", "accessToken", "refresh_token",
+        for key in ("Authorization", "X-Api-Key", "refreshToken", "sessionSecret", "cookie", "accessToken", "refresh_token",
                     "apiKey", "api_key", "password", "privateKey", "sessionSecret"):
             self.assertEqual(cleaned[key], "[REDACTED]")
         self.assertEqual(cleaned["nested"]["client_secret"], "[REDACTED]")
