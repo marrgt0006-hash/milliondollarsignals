@@ -1,6 +1,6 @@
 import unittest
 
-from scripts.polymarket_us_diagnostic import extract_candidate, redact_public_payload
+from scripts.polymarket_us_diagnostic import extract_candidate, redact_public_payload, redact_text_credentials
 
 
 class RedactionTests(unittest.TestCase):
@@ -18,6 +18,14 @@ class RedactionTests(unittest.TestCase):
         self.assertEqual(cleaned["token_id"], "public-down-456")
         self.assertEqual(cleaned["marketSides"][0]["tokenId"], "public-up-123")
         self.assertEqual(cleaned["marketSides"][1]["token_id"], "public-down-456")
+
+    def test_plain_text_credentials_are_redacted_without_touching_token_ids(self):
+        raw = "Authorization: Bearer abc123; tokenId=public-42; api_key=secret-77; Cookie: sid=private"
+        cleaned = redact_text_credentials(raw)
+        self.assertIn("tokenId=public-42", cleaned)
+        self.assertNotIn("abc123", cleaned)
+        self.assertNotIn("secret-77", cleaned)
+        self.assertNotIn("sid=private", cleaned)
 
     def test_credentials_are_redacted_recursively(self):
         payload = {
